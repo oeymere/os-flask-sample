@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+    <title>{{ config.APP_NAME }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mui.css') }}" type="text/css" />
+</head>
+<body>
+    <div class="mui--text-title">Application Configuration:</div>
+    <div class="mui-container-fluid">       
+        {% for item in config %}
+            <div class="mui-row">
+                <div class="mui-col-md-4">{{ item }}</div>
+                <div class="mui-col-md-4">{{ config[item] }}</div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
