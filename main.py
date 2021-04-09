@@ -74,6 +74,11 @@ def weather_by_latlon():
     return Response(response.text, status=200, content_type='application/json')
 
 
+@app.route('/live', methods=['GET'])
+def live():
+    return Response('{"status": "OK"}', status=200, content_type='application/json')
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
 
