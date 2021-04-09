@@ -79,7 +79,7 @@ def weather_by_latlon():
 
 @app.route('/live', methods=['GET'])
 def live():
-    app.logger.info("Application status OK")
+    app.logger.debug("Application status OK")
     return Response('{"status": "OK"}', status=200, content_type='application/json')
 
 
