@@ -1,2 +1,3 @@
-APP_NAME = "Open Shift Flask Sample"
-SECRET_KEY = '49\xb4\xe8\xbd\x9de\x19\xd4(\xc4\xe6\xdd\xa5>\xc9|\r\x9fSYO\x85*'
+APP_NAME = "Open Shift Flask Sample - Weather API"
+MAX_CONTENT_LENGTH = 1048576
+BASE_URL = 'http://api.openweathermap.org/data/2.5/weather'

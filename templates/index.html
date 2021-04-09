@@ -6,12 +6,14 @@
 </head>
 <body>
     <div class="mui--text-title">Application Configuration:</div>
-    <div class="mui-container-fluid">       
+    <div class="mui-container-fluid">
         {% for item in config %}
-            <div class="mui-row">
-                <div class="mui-col-md-4">{{ item }}</div>
-                <div class="mui-col-md-4">{{ config[item] }}</div>
-            </div>
+            {% if item != 'SECRET_KEY' %}
+                <div class="mui-row">
+                    <div class="mui-col-md-4">{{ item }}</div>
+                    <div class="mui-col-md-4">{{ config[item] }}</div>
+                </div>
+                {% endif %}
         {% endfor %}
     </div>
 </body>
