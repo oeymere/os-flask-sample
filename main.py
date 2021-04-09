@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request, Response
 import requests
 import os
+import logging
+import sys
 
 
 app = Flask('flasksample')
 app.config.from_object('config')
+app.logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 if not SECRET_KEY:
@@ -76,6 +79,7 @@ def weather_by_latlon():
 
 @app.route('/live', methods=['GET'])
 def live():
+    app.logger.info("Application status OK")
     return Response('{"status": "OK"}', status=200, content_type='application/json')
 
 
