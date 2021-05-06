@@ -1,0 +1,183 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: weather
+  annotations:
+    openshift.io/display-name: Weather Lookup Application
+    description: The Weather API provides an HTTP API that returns current weather for a given location. This template deploys only the flask application.  The full template deploys flask and nginx proxy to flask.
+    iconClass: icon-php
+    tags: python,nginx
+objects:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+      app: flask
+      app.kubernetes.io/component: flask
+      app.kubernetes.io/instance: flask
+    name: flask
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+    labels:
+      app: flask
+      app.kubernetes.io/component: flask
+      app.kubernetes.io/instance: flask
+    name: flask
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: flask:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/oeymere/os-flask-sample
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: python:3.6
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: ${SECRET}
+      type: GitHub
+    - generic:
+        secret: qrLTpL5_bB00BhmJphuM
+      type: Generic
+    - type: ConfigChange
+    - imageChange:
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+    labels:
+      app: flask
+      app.kubernetes.io/component: flask
+      app.kubernetes.io/instance: flask
+    name: flask
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      deploymentconfig: flask
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deploymentconfig: flask
+      spec:
+        containers:
+        - env:
+          - name: SECRET_KEY
+            value: ${SECRET_KEY}
+          - name: WEATHER_API_KEY
+            value: ${WEATHER_API_KEY}
+          - name: FLASK_ENV
+            value: ${FLASK_ENV}
+          - name: FLASK_APP
+            value: main.py
+          imagePullPolicy: Always
+          name: flask
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - flask
+        from:
+          kind: ImageStreamTag
+          name: flask:latest
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+    labels:
+      app: flask
+      app.kubernetes.io/component: flask
+      app.kubernetes.io/instance: flask
+    name: flask
+  spec:
+    ports:
+    - name: 5000-tcp
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+    selector:
+      deploymentconfig: flask
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+    labels:
+      app: flask
+      app.kubernetes.io/component: flask
+      app.kubernetes.io/instance: flask
+    name: flask
+  spec:
+    port:
+      targetPort: 5000-tcp
+    to:
+      kind: Service
+      name: flask
+      weight: 100
+    wildcardPolicy: None
+parameters:
+- name: SECRET_KEY
+  displayName: Secret Key
+  description: Flask secret key
+  required: true
+- name: WEATHER_API_KEY
+  displayName: Open weather API key
+  description: API key to query open weather map apis
+  required: true
+- name: FLASK_ENV
+  displayName: Flask deployment enviroment
+  description: If set to development flask runs in debug mode
+  required: false
+- name: SECRET
+  displayName: Webhook secret
+  description: Webhook secret
+  generate: expression
+  from: '[a-zA-Z0-9]{40}'
