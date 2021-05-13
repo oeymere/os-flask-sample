@@ -6,4 +6,4 @@ RUN cd /opt/app-root/src
 RUN pip install -r requirements.txt
 
 USER 1001
-CMD ['flask', 'run', '-h', '0.0.0.0']
+CMD ["flask", "run", "-h", "0.0.0.0"]
